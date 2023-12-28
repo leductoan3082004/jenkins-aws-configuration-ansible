@@ -1,0 +1,39 @@
+- name: Install Jenkins in ec2 instance
+  hosts: jenkins
+  become: yes
+  tasks:
+    - name: Upgrade all packages
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+
+    - name: Add jenkins repo
+      ansible.builtin.get_url:
+        url:  https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+
+    - name: Import a key from a url
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+    - name: Upgrade all packages
+      ansible.builtin.yum:
+        name: '*'
+        state: latest
+
+    - name: Install java-17
+      ansible.builtin.dnf:
+        name: java-17-amazon-corretto
+        state: present
+
+    - name: Install jenkins
+      ansible.builtin.yum:
+        name: jenkins
+        state: present
+
+    - name: Run jenkins service
+      ansible.builtin.systemd_service:
+        name: jenkins
+        state: started
+
